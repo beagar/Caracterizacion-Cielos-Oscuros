@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caracterización de los Cielos Oscuros en América - Mapeo de Contaminación Lumínica</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0b132b; color: #e2e8f0; }
+        .card { background-color: #1c2541; border: 1px solid #3a506b; }
+        /* Ocultar flechas nativas en campos numéricos */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col items-center p-4">
+
+    <header class="w-full max-w-md flex flex-col items-center my-6 text-center">
+        <img src="logoROAD.jpeg" alt="Logo Andean ROAD" class="h-20 w-auto object-contain mb-3 rounded-lg shadow-md">
+        <h1 class="text-2xl font-extrabold text-cyan-400 tracking-wide uppercase">Caracterización de cielos en América</h1>
+        <p class="text-xs text-slate-400 mt-2">Proyecto de Ciencia Ciudadana contra la Contaminación Lumínica</p>
+    </header>
+
+    <main class="w-full max-w-md space-y-6">
+        <form id="observationForm" class="space-y-6">
+
+            <section class="card p-5 rounded-2xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-cyan-500 text-slate-900 font-bold rounded-full h-6 w-6 flex items-center justify-center text-sm">1</span>
+                    <h2 class="text-lg font-semibold text-slate-200">Fecha y Hora</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Fecha de Observación</label>
+                        <input type="date" id="obsDate" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Hora Local</label>
+                        <input type="time" id="obsTime" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    </div>
+                </div>
+            </section>
+
+            <section class="card p-5 rounded-2xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-cyan-500 text-slate-900 font-bold rounded-full h-6 w-6 flex items-center justify-center text-sm">2</span>
+                    <h2 class="text-lg font-semibold text-slate-200">Ubicación de Observación</h2>
+                </div>
+                <div class="space-y-3">
+                    <button type="button" id="getLocationBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer">
+                        Obtener Ubicación GPS Actual
+                    </button>
+
+                    <p class="text-[10px] text-slate-400 text-center italic">Puedes usar el GPS o ingresar las coordenadas manualmente abajo:</p>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Latitud (°)</label>
+                            <input type="number" id="latInput" step="any" placeholder="Ej: -34.6037" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm font-mono focus:outline-none focus:border-cyan-500 text-cyan-400 font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Longitud (°)</label>
+                            <input type="number" id="lngInput" step="any" placeholder="Ej: -58.3816" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm font-mono focus:outline-none focus:border-cyan-500 text-cyan-400 font-semibold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Comentarios sobre el lugar (Opcional)</label>
+                        <input type="text" id="locationComments" placeholder="Ej: patio trasero, observación rural" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                    </div>
+                </div>
+            </section>
+
+            <section class="card p-5 rounded-2xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-cyan-500 text-slate-900 font-bold rounded-full h-6 w-6 flex items-center justify-center text-sm">3</span>
+                    <h2 class="text-lg font-semibold text-slate-200">Selección del Cielo</h2>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-xs text-slate-400 mb-2">1. Selecciona la constelación que estás mirando:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="btnOrion" onclick="cambiarConstelacion('orion')" class="py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-cyan-950/40 border-cyan-400 text-cyan-400">
+                            Orión
+                        </button>
+                        <button type="button" id="btnSagitario" onclick="cambiarConstelacion('sagitario')" class="py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-slate-900 border border-slate-700 text-slate-400">
+                            Sagitario (La Tetera)
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-400 mb-4">2. Elige la carta estelar que mejor represente las estrellas más tenues que logres ver a simple vista:</p>
+
+                <div class="grid grid-cols-3 gap-2" id="magnitudeContainer">
+                    </div>
+                <input type="hidden" id="selectedMagnitude" required value="">
+            </section>
+
+            <section class="card p-5 rounded-2xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-cyan-500 text-slate-900 font-bold rounded-full h-6 w-6 flex items-center justify-center text-sm">4</span>
+                    <h2 class="text-lg font-semibold text-slate-200">Condiciones del Cielo</h2>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-2">Cantidad de nubes presentes:</label>
+                        <select id="cloudCover" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                            <option value="" disabled selected>Selecciona el estado del cielo...</option>
+                            <option value="clear">Cielo Despejado (Sin nubes)</option>
+                            <option value="quarter">¼ del cielo cubierto</option>
+                            <option value="half">½ del cielo cubierto</option>
+                            <option value="more_than_half">Más de ½ del cielo cubierto</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="button" id="toggleSqmBtn" onclick="toggleSqmField()" class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center space-x-1 transition-colors cursor-pointer focus:outline-none">
+                            <span>¿Utilizaste un medidor SQM? (Opcional)</span>
+                            <span id="sqmArrow">➔</span>
+                        </button>
+
+                        <div id="sqmFieldContainer" class="hidden mt-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800 transition-all">
+                            <label class="block text-xs text-slate-400 mb-1">Valor obtenido en el SQM (mag/arcsec²):</label>
+                            <input type="number" id="sqmInput" step="0.01" min="0" max="30" placeholder="Ej: 21.45" class="w-40 bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm font-mono focus:outline-none focus:border-cyan-500 text-slate-200">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card p-5 rounded-2xl shadow-xl">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-cyan-500 text-slate-900 font-bold rounded-full h-6 w-6 flex items-center justify-center text-sm">5</span>
+                    <h2 class="text-lg font-semibold text-slate-200">Identificación</h2>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Correo de SciStarter / Proyecto (Opcional)</label>
+                    <input type="email" id="userEmail" placeholder="tu-correo@ejemplo.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+            </section>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-md transition-colors shadow-lg cursor-pointer">
+                Enviar Observación del Cielo Nocturno
+            </button>
+        </form>
+    </main>
+
+    <footer class="text-center text-xs text-slate-500 my-8">
+        &copy; 2026 Proyecto SkyGaze. Inspirado en Globe at Night.
+    </footer>
+
+    <script>
+        let constelacionActiva = 'orion';
+
+        // Base de datos posicional (X, Y de 0 a 100) y Magnitudes reales
+        const datosEstelares = {
+            orion: [
+                { nombre: "Rigel", x: 65, y: 75, mag: 0.1 },
+                { nombre: "Betelgeuse", x: 35, y: 25, mag: 0.4 },
+                { nombre: "Bellatrix", x: 63, y: 28, mag: 1.6 },
+                { nombre: "Alnilam", x: 50, y: 50, mag: 1.7 },
+                { nombre: "Alnitak", x: 45, y: 51, mag: 1.7 },
+                { nombre: "Saiph", x: 37, y: 72, mag: 2.1 },
+                { nombre: "Mintaka", x: 55, y: 49, mag: 2.2 },
+                { nombre: "Meissa", x: 49, y: 18, mag: 3.4 },
+                { nombre: "Espada 1", x: 48, y: 58, mag: 4.0 },
+                { nombre: "Espada 2", x: 49, y: 61, mag: 4.6 },
+                { nombre: "Fondo 1", x: 20, y: 40, mag: 5.2 },
+                { nombre: "Fondo 2", x: 80, y: 60, mag: 5.7 }
+            ],
+            sagitario: [
+                { nombre: "Kaus Australis", x: 45, y: 75, mag: 1.8 },
+                { nombre: "Nunki", x: 70, y: 45, mag: 2.0 },
+                { nombre: "Ascella", x: 68, y: 68, mag: 2.6 },
+                { nombre: "Kaus Media", x: 38, y: 60, mag: 2.7 },
+                { nombre: "Kaus Borealis", x: 50, y: 46, mag: 2.8 },
+                { nombre: "Alnasl", x: 25, y: 56, mag: 3.0 },
+                { nombre: "Phi Sagittarii", x: 56, y: 53, mag: 3.1 },
+                { nombre: "Tau Sagittarii", x: 78, y: 55, mag: 3.3 },
+                { nombre: "Hekate", x: 30, y: 25, mag: 4.5 },
+                { nombre: "Fondo Rural 1", x: 15, y: 70, mag: 5.1 },
+                { nombre: "Fondo Rural 2", x: 85, y: 20, mag: 5.5 },
+                { nombre: "Fondo Prístino", x: 50, y: 85, mag: 5.9 }
+            ]
+        };
+
+        // Función auxiliar para fijar la fecha y hora local actual
+        function inicializarFechaYHora() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            document.getElementById('obsDate').value = `${year}-${month}-${day}`;
+            document.getElementById('obsTime').value = `${hours}:${minutes}`;
+        }
+
+        // Auto-completar fecha y hora local actual al iniciar
+        document.addEventListener("DOMContentLoaded", () => {
+            inicializarFechaYHora();
+            generateMagnitudeCharts();
+        });
+
+        // API de Geolocalización de HTML5 (Rellena los inputs manuales)
+        document.getElementById('getLocationBtn').addEventListener('click', () => {
+            const btn = document.getElementById('getLocationBtn');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        document.getElementById('latInput').value = lat.toFixed(5);
+                        document.getElementById('lngInput').value = lng.toFixed(5);
+
+                        btn.className = "w-full bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer";
+                        btn.innerText = "Ubicación GPS Obtenida ✓";
+                    },
+                    (error) => {
+                        alert("No se pudo obtener la ubicación GPS automática. Por favor, ingresa los datos manualmente en los casilleros.");
+                    }
+                );
+            } else {
+                alert("La geolocalización automática no es compatible. Por favor, escribe tus coordenadas manualmente.");
+            }
+        });
+
+        // Desplegar/Ocultar el panel del fotómetro SQM
+        function toggleSqmField() {
+            const container = document.getElementById('sqmFieldContainer');
+            const arrow = document.getElementById('sqmArrow');
+            const input = document.getElementById('sqmInput');
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                arrow.innerText = "▼";
+            } else {
+                container.classList.add('hidden');
+                arrow.innerText = "➔";
+                input.value = ""; // Limpiar el número si se cierra
+            }
+        }
+
+        // Alternar la constelación activa y actualizar la vista
+        function cambiarConstelacion(constelacion) {
+            constelacionActiva = constelacion;
+
+            const btnOrion = document.getElementById('btnOrion');
+            const btnSagi = document.getElementById('btnSagitario');
+
+            if (constelacion === 'orion') {
+                btnOrion.className = "py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-cyan-950/40 border-cyan-400 text-cyan-400";
+                btnSagi.className = "py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-slate-900 border-slate-700 text-slate-400";
+            } else {
+                btnSagi.className = "py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-cyan-950/40 border-cyan-400 text-cyan-400";
+                btnOrion.className = "py-2.5 px-4 rounded-xl border font-bold text-sm transition-all cursor-pointer bg-slate-900 border-slate-700 text-slate-400";
+            }
+
+            document.getElementById('selectedMagnitude').value = ""; // Resetear selección
+            generateMagnitudeCharts();
+        }
+
+        // Generar las tarjetas interactivas de Magnitud Límite
+        function generateMagnitudeCharts() {
+            const container = document.getElementById('magnitudeContainer');
+            container.innerHTML = "";
+
+            for (let magLimite = 1; magLimite <= 6; magLimite++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'mag-btn bg-slate-950 border border-slate-800 hover:border-cyan-400 p-2 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all';
+                btn.dataset.value = magLimite;
+
+                const canvasId = `canvas-mag-${magLimite}`;
+                btn.innerHTML = `
+                    <span class="text-xs text-slate-400 mb-1">Mág. Límite ${magLimite}</span>
+                    <canvas id="${canvasId}" width="120" height="120" class="bg-[#050b14] rounded-lg border border-slate-900"></canvas>
+                `;
+
+                btn.addEventListener('click', () => selectMagnitude(magLimite, btn));
+                container.appendChild(btn);
+
+                setTimeout(() => {
+                    dibujarMapaCeleste(canvasId, magLimite);
+                }, 0);
+            }
+        }
+
+        // Renderizado del mapa en Canvas según la magnitud límite
+        function dibujarMapaCeleste(canvasId, magLimite) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const listaEstrellas = datosEstelares[constelacionActiva];
+            const estrellasVisibles = listaEstrellas.filter(e => e.mag <= magLimite);
+
+            estrellasVisibles.forEach(e => {
+                const pixelX = (e.x / 100) * w;
+                const pixelY = (e.y / 100) * h;
+
+                const radio = Math.max(0.6, (7 - e.mag) * 0.55);
+
+                ctx.beginPath();
+                ctx.arc(pixelX, pixelY, radio, 0, 2 * Math.PI);
+
+                ctx.fillStyle = e.mag < 1.0 ? '#e0f2fe' : '#ffffff';
+                if(e.mag < 0.5) {
+                    ctx.shadowBlur = 3;
+                    ctx.shadowColor = '#22d3ee';
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                ctx.fill();
+            });
+        }
+
+        // Control visual de la tarjeta seleccionada
+        function selectMagnitude(value, targetElement) {
+            document.querySelectorAll('.mag-btn').forEach(btn => {
+                btn.classList.remove('border-cyan-400', 'bg-cyan-950/40');
+                btn.classList.add('border-slate-800');
+            });
+            targetElement.classList.remove('border-slate-800');
+            targetElement.classList.add('border-cyan-400', 'bg-cyan-950/40');
+            document.getElementById('selectedMagnitude').value = value;
+        }
+
+        // CONFIGURACIÓN DE TU GOOGLE FORM
+        const FORM_ACTION_URL = "https://docs.google.com/forms/d/e/1FAIpQLSd3VbRB0-3CRJHyksAUtGt-qyCM2UbLuT_sPGZ-YjRA9vplSw/formResponse";
+
+        const FORM_ENTRIES = {
+            constelacion: "entry.485132061",
+            fecha:        "entry.1782522827",
+            hora:         "entry.1282177598",
+            coordinates:  "entry.170777227",
+            comentarios:  "entry.147482579",
+            magnitud:     "entry.76218442",
+            nubes:        "entry.1627574253",
+            email:        "entry.993642505",
+            sqm:          "entry.TU_ID_DE_SQM" // <- Reemplazar con el ID de columna real en tu Google Form si recopilas SQM en Sheets
+        };
+
+        // Envío asíncrono de los datos simulando el formulario de Google
+        document.getElementById('observationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const magnitude = document.getElementById('selectedMagnitude').value;
+            if (!magnitude) {
+                alert("Por favor, selecciona una carta estelar que coincida con la visibilidad de tu cielo.");
+                return;
+            }
+
+            // Capturar coordenadas escritas a mano o cargadas por GPS
+            const userLat = parseFloat(document.getElementById('latInput').value) || 0;
+            const userLng = parseFloat(document.getElementById('lngInput').value) || 0;
+            const coordsString = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+
+            const sqmVal = document.getElementById('sqmInput').value;
+
+            const formData = new URLSearchParams();
+            formData.append(FORM_ENTRIES.constelacion, constelacionActiva);
+            formData.append(FORM_ENTRIES.fecha,        document.getElementById('obsDate').value);
+            formData.append(FORM_ENTRIES.hora,         document.getElementById('obsTime').value);
+            formData.append(FORM_ENTRIES.coordinates,  coordsString);
+            formData.append(FORM_ENTRIES.comentarios,  document.getElementById('locationComments').value);
+            formData.append(FORM_ENTRIES.magnitud,     magnitude);
+            formData.append(FORM_ENTRIES.nubes,        document.getElementById('cloudCover').value);
+            formData.append(FORM_ENTRIES.email,        document.getElementById('userEmail').value);
+
+            // Adjuntar SQM si se ingresó un valor
+            if (sqmVal && FORM_ENTRIES.sqm !== "entry.TU_ID_DE_SQM") {
+                formData.append(FORM_ENTRIES.sqm, sqmVal);
+            }
+
+            fetch(FORM_ACTION_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(() => {
+                alert("¡Observación enviada con éxito! Los datos han sido registrados en la base de datos de Google. Gracias por proteger nuestros cielos oscuros.");
+
+                // Resetear la interfaz de forma limpia
+                document.getElementById('observationForm').reset();
+                document.getElementById('selectedMagnitude').value = "";
+                document.querySelectorAll('.mag-btn').forEach(btn => btn.classList.remove('border-cyan-400', 'bg-cyan-950/40'));
+
+                // Limpiar inputs manuales de coordenadas
+                document.getElementById('latInput').value = "";
+                document.getElementById('lngInput').value = "";
+
+                // Restablecer panel SQM
+                document.getElementById('sqmFieldContainer').classList.add('hidden');
+                document.getElementById('sqmArrow').innerText = "➔";
+
+                // Restablecer el botón de GPS al estado inicial
+                const gpsBtn = document.getElementById('getLocationBtn');
+                gpsBtn.className = "w-full bg-cyan-600 hover:bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg text-sm transition-colors cursor-pointer";
+                gpsBtn.innerText = "Obtener Ubicación GPS Actual";
+
+                // Restablecer tiempo y mapas por defecto
+                inicializarFechaYHora();
+                cambiarConstelacion('orion');
+            })
+            .catch((err) => {
+                console.error("Error en el envío de datos de ciencia ciudadana:", err);
+                alert("Hubo un inconveniente al procesar el envío. Verifica tu conexión de red.");
+            });
+        });
+    </script>
+</body>
+</html>
