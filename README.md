@@ -1,4 +1,4 @@
-Esta aplicación (en lenguaje html) fue preparada por la Oficina Andina de Astronomía para el Desarrollo ([adean road](https://andean.astro4dev.org/) y tiene por objetivo recolectar datos de la región con el fin de cacarterizar los cielos oscuros de Latinoamérica.
+Esta aplicación (en lenguaje html) fue preparada por la Oficina Andina de Astronomía para el Desarrollo ([adean road])(https://andean.astro4dev.org/) y tiene por objetivo recolectar datos de la región con el fin de cacarterizar los cielos oscuros de Latinoamérica.
 
 Los datos que se recolectan son:
 1. Ubicación del observador.
